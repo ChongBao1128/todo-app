@@ -4,19 +4,39 @@ import { AppService } from './app.service';
 
 describe('AppController', () => {
   let appController: AppController;
+  let appService: AppService;
 
   beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService],
+      providers: [
+        {
+          provide: AppService,
+          useValue: {
+            // Mock the createTodo method
+            createTodo: jest.fn((dto) => ({ id: 1, ...dto })),
+          },
+        },
+      ],
     }).compile();
 
-    appController = app.get<AppController>(AppController);
+    appController = module.get<AppController>(AppController);
+    appService = module.get<AppService>(AppService);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('createTodo', () => {
+    it('should create a new todo item', () => {
+      // Sample data
+      const createTodoDto = { title: 'Test Todo', description: 'Test description' };
+
+      // Calling createTodo method
+      const result = appController.createTodo(createTodoDto);
+
+      // Ensure that the AppService.createTodo method was called with the right DTO
+      expect(appService.createTodo).toHaveBeenCalledWith(createTodoDto);
+
+      // Check that the result matches the expected outcome
+      expect(result).toEqual({ id: 1, title: 'Test Todo', description: 'Test description' });
     });
   });
 });
