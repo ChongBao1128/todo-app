@@ -1,7 +1,7 @@
 export class UpdateTodoDto {
-    readonly title?: string;
-    readonly description?: string;
-    readonly status?: boolean;
+    readonly task?: string;
+    readonly isCompleted?: boolean;
+    readonly insertedAt?: Date;
 }
   
 
