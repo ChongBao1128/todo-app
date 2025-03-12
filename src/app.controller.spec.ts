@@ -24,6 +24,7 @@ describe('AppController', () => {
             createTodo: jest.fn((dto) => ({ id: 1, ...dto })),
             updateTodo: jest.fn(),
             deleteTodo: jest.fn(),
+            deleteAllTodos: jest.fn()
           },
         },
       ],
@@ -135,5 +136,28 @@ describe('AppController', () => {
       expect(appService.deleteTodo).toHaveBeenCalledWith(999);
     });
   });
+
+  // Unit Test for Removing all items in Todo list
+  describe('deleteAllTodo', () => {
+    it('should delete all todos and return the deleted todos', () => {
+      const allTodos = [
+        { id: 1, title: 'Todo 1', description: 'Test description 1' },
+        { id: 2, title: 'Todo 2', description: 'Test description 2' },
+      ];
+  
+      // Mock the deleteAllTodos method to return the predefined todos array
+      (appService.deleteAllTodos as jest.Mock).mockReturnValue(allTodos);
+  
+      // Call the controller's deleteAllTodo method
+      const result = appController.deleteAllTodo();
+  
+      // Verify that the service method was called
+      expect(appService.deleteAllTodos).toHaveBeenCalled();
+  
+      // Verify that the controller returns the expected todos
+      expect(result).toEqual(allTodos);
+    });
+  });
+  
   
 });
