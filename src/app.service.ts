@@ -55,4 +55,14 @@ export class AppService {
     
     return removed;
   }
+
+  // Remove all todo items
+  deleteAllTodos(): Todo[] {
+    const allTodos = { ...this.todos };
+
+    // Clear all existing items
+    this.todos = [];
+
+    return allTodos;
+  }
 }
