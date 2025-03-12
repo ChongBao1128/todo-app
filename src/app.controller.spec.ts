@@ -23,6 +23,7 @@ describe('AppController', () => {
             ]),
             createTodo: jest.fn((dto) => ({ id: 1, ...dto })),
             updateTodo: jest.fn(),
+            deleteTodo: jest.fn(),
           },
         },
       ],
@@ -32,6 +33,7 @@ describe('AppController', () => {
     appService = module.get<AppService>(AppService);
   });
 
+  // Unit Test for Retrieving all todo items
   describe('getAllTodos', () => {
     it('should return an array of todos', () => {
       // Define expected todos matching the mock
@@ -53,6 +55,7 @@ describe('AppController', () => {
     });
   });
 
+  // Unit Test for Create a new todo item
   describe('createTodo', () => {
     it('should create a new todo item', () => {
       // Sample data
@@ -69,6 +72,7 @@ describe('AppController', () => {
     });
   });
 
+  // Unit Test for Update todo item
   describe('updateTodo', () => {
     it('should update an existing todo and return the updated todo', () => {
       const id = '1';
@@ -98,4 +102,38 @@ describe('AppController', () => {
       expect(appService.updateTodo).toHaveBeenCalledWith(999, updateData);
     });
   })
+
+  // Unit Test for Remove one todo item
+  describe('deleteTodo', () => {
+    it('should delete a todo by id and return the removed todo', () => {
+      const id = '1';
+      const removedTodo = { id: 1, title: 'Todo 1', description: 'Test description 1' };
+  
+      // Mock the deleteTodo method to return the removed todo
+      (appService.deleteTodo as jest.Mock).mockReturnValue(removedTodo);
+  
+      // Call the controller's deleteTodo method (id is passed as string, service expects a number)
+      const result = appController.deleteTodo(id);
+  
+      // Verify that the service method was called with the correct numeric id
+      expect(appService.deleteTodo).toHaveBeenCalledWith(1);
+  
+      // Verify that the result matches the removed todo
+      expect(result).toEqual(removedTodo);
+    });
+  
+    it('should throw NotFoundException if the todo is not found', () => {
+      const id = '999';
+  
+      // Mock the deleteTodo method to throw a NotFoundException
+      (appService.deleteTodo as jest.Mock).mockImplementation(() => {
+        throw new NotFoundException(`Todo with id ${id} not found`);
+      });
+  
+      // Expect the controller's deleteTodo method to throw the exception
+      expect(() => appController.deleteTodo(id)).toThrow(NotFoundException);
+      expect(appService.deleteTodo).toHaveBeenCalledWith(999);
+    });
+  });
+  
 });

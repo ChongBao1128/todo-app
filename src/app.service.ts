@@ -42,4 +42,17 @@ export class AppService {
     
     return updatedTodo;
   }
+
+  // Remove one todo item from database
+  deleteTodo(id: number): Todo {
+    const index = this.todos.findIndex(todo => todo.id === id);
+
+    if (index === -1) {
+      throw new NotFoundException(`Todo with id ${id} not found`);
+    }
+
+    const removed = this.todos.splice(index, 1)[0];
+    
+    return removed;
+  }
 }
