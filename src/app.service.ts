@@ -1,68 +1,85 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { SupabaseService } from './supabase/supabase.service';
 
 export interface Todo {
   id: number;
-  title: string;
-  description?: string;
-  status?: boolean;
+  task: string;
+  isCompleted?: boolean;
+  insertedAt?: Date;
 }
 
 @Injectable()
 export class AppService {
-  private todos: Todo[] = [];
-  private idCounter = 1;
+  constructor(private readonly supabaseService: SupabaseService) {}
 
-  // Read all todo items from database
-  getTodos(): Todo[] {
-    return this.todos;
-  }
+  // Get all todos from the Supabase 'todos' table
+  async getTodos(): Promise<Todo[]> {
+    const { data, error } = await this.supabaseService.supabase
+      .from('todos')
+      .select('*');
 
-  // Create a new todo item to database
-  createTodo(todo: Omit<Todo, 'id'>): Todo {
-    const newTodo: Todo = {
-      id: this.idCounter++, // Assign auto-incremented id
-      ...todo // rest of items
-    };
-
-    this.todos.push(newTodo); // Add the new todo to the list
-    return newTodo;
-  }
-
-  // Update existing todo item
-  updateTodo(id: number, updateData: Partial<Omit<Todo, 'id'>>): Todo {
-    const index = this.todos.findIndex(todo => todo.id === id);
-
-    if(index === -1) {
-      throw new NotFoundException(`Todo with ${id} not found!`); // not found
+    if (error) {
+      throw error;
     }
 
-    const updatedTodo = { ...this.todos[index], ...updateData };
-
-    this.todos[index] = updatedTodo;    
-    
-    return updatedTodo;
+    return data;
   }
 
-  // Remove one todo item from database
-  deleteTodo(id: number): Todo {
-    const index = this.todos.findIndex(todo => todo.id === id);
+  // Insert a new todo into the Supabase 'todos' table
+  async createTodo(todo: Omit<Todo, 'id'>): Promise<Todo> {
+    const { data, error } = await this.supabaseService.supabase
+      .from('todos')
+      .insert([todo])
+      .single();
 
-    if (index === -1) {
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  }
+
+  // Update an existing todo in the Supabase 'todos' table
+  async updateTodo(id: number, updateData: Partial<Omit<Todo, 'id'>>): Promise<Todo> {
+    const { data, error } = await this.supabaseService.supabase
+      .from('todos')
+      .update(updateData)
+      .eq('id', id)
+      .single();
+
+    if (error) {
       throw new NotFoundException(`Todo with id ${id} not found`);
     }
 
-    const removed = this.todos.splice(index, 1)[0];
-    
-    return removed;
+    return data;
   }
 
-  // Remove all todo items
-  deleteAllTodos(): Todo[] {
-    const allTodos = { ...this.todos };
+  // Delete a todo from the Supabase 'todos' table
+  async deleteTodo(id: number): Promise<Todo> {
+    const { data, error } = await this.supabaseService.supabase
+      .from('todos')
+      .delete()
+      .eq('id', id)
+      .single();
 
-    // Clear all existing items
-    this.todos = [];
+    if (error) {
+      throw new NotFoundException(`Todo with id ${id} not found`);
+    }
 
-    return allTodos;
+    return data;
+  }
+
+  // Delete all todos from the Supabase 'todos' table
+  async deleteAllTodos(): Promise<Todo[]> {
+    const { data, error } = await this.supabaseService.supabase
+      .from('todos')
+      .delete()
+      .gt("id", 0);
+
+    if (error) {
+      throw error;
+    }
+
+    return data || [];
   }
 }
