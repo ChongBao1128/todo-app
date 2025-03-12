@@ -8,12 +8,12 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getAllTodos(): Todo[] {
+  getAllTodos(): Promise<Todo[]> {
     return this.appService.getTodos();
   }
 
   @Post()
-  createTodo(@Body() createTodoDto: CreateTodoDto): Todo {
+  createTodo(@Body() createTodoDto: CreateTodoDto): Promise<Todo> {
     return this.appService.createTodo(createTodoDto);
   }
 
@@ -21,18 +21,17 @@ export class AppController {
   updateTodo(
     @Param('id') id: string,
     @Body() updateData: UpdateTodoDto,
-  ): Todo {
+  ): Promise<Todo> {
     return this.appService.updateTodo(Number(id), updateData);
   }
 
   @Delete(':id')
-  deleteTodo(@Param('id') id: string): Todo {
+  deleteTodo(@Param('id') id: string): Promise<Todo> {
     return this.appService.deleteTodo(Number(id));
   }
 
   @Delete()
-  deleteAllTodo(): Todo[] {
+  deleteAllTodo(): Promise<Todo[]> {
     return this.appService.deleteAllTodos();
   }
-
 }
