@@ -14,17 +14,14 @@ describe('AppController', () => {
         {
           provide: AppService,
           useValue: {
-            // Mock the createTodo method
             getTodos: jest.fn(() => [
-              { id: 1, title: 'Todo 1', description: 'Test description 1' },
-              { id: 2, title: 'Todo 2', description: 'Test description 2' },
-              { id: 3, title: 'Todo 3', description: 'Test description 3' },
-              { id: 4, title: 'Todo 4', description: 'Test description 4' },
+              { id: 1, task: 'Task 1', isCompleted: false, insertedAt: new Date() },
+              { id: 2, task: 'Task 2', isCompleted: true, insertedAt: new Date() },
             ]),
-            createTodo: jest.fn((dto) => ({ id: 1, ...dto })),
+            createTodo: jest.fn((dto) => ({ id: 1, ...dto, insertedAt: new Date() })),
             updateTodo: jest.fn(),
             deleteTodo: jest.fn(),
-            deleteAllTodos: jest.fn()
+            deleteAllTodos: jest.fn(),
           },
         },
       ],
@@ -34,130 +31,79 @@ describe('AppController', () => {
     appService = module.get<AppService>(AppService);
   });
 
-  // Unit Test for Retrieving all todo items
   describe('getAllTodos', () => {
     it('should return an array of todos', () => {
-      // Define expected todos matching the mock
       const expectedTodos = [
-        { id: 1, title: 'Todo 1', description: 'Test description 1' },
-        { id: 2, title: 'Todo 2', description: 'Test description 2' },
-        { id: 3, title: 'Todo 3', description: 'Test description 3' },
-        { id: 4, title: 'Todo 4', description: 'Test description 4' },
+        { id: 1, task: 'Task 1', isCompleted: false, insertedAt: expect.any(Date) },
+        { id: 2, task: 'Task 2', isCompleted: true, insertedAt: expect.any(Date) },
       ];
-
-      // Call the controller method
       const todos = appController.getAllTodos();
-
-      // Verify that the service method was called
       expect(appService.getTodos).toHaveBeenCalled();
-
-      // Verify that the controller returns the expected todos
       expect(todos).toEqual(expectedTodos);
     });
   });
 
-  // Unit Test for Create a new todo item
   describe('createTodo', () => {
     it('should create a new todo item', () => {
-      // Sample data
-      const createTodoDto = { title: 'Test Todo', description: 'Test description' };
-
-      // Calling createTodo method
+      const createTodoDto = { task: 'New Task', isCompleted: false };
       const result = appController.createTodo(createTodoDto);
-
-      // Ensure that the AppService.createTodo method was called with the right DTO
       expect(appService.createTodo).toHaveBeenCalledWith(createTodoDto);
-
-      // Check that the result matches the expected outcome
-      expect(result).toEqual({ id: 1, title: 'Test Todo', description: 'Test description' });
+      expect(result).toEqual({ id: 1, ...createTodoDto, insertedAt: expect.any(Date) });
     });
   });
 
-  // Unit Test for Update todo item
   describe('updateTodo', () => {
-    it('should update an existing todo and return the updated todo', () => {
+    it('should update an existing todo', () => {
       const id = '1';
-      const updateData = { title: 'Updated Title' };
-      const updatedTodo = { id: 1, title: 'Updated Title', description: 'Existing description' };
-  
-      // Mock the updateTodo method to return our updatedTodo
+      const updateData = { task: 'Updated Task', isCompleted: true };
+      const updatedTodo = { id: 1, ...updateData, insertedAt: new Date() };
       (appService.updateTodo as jest.Mock).mockReturnValue(updatedTodo);
-  
       const result = appController.updateTodo(id, updateData);
-  
       expect(appService.updateTodo).toHaveBeenCalledWith(1, updateData);
       expect(result).toEqual(updatedTodo);
     });
-  
+
     it('should throw NotFoundException if todo is not found', () => {
       const id = '999';
-      const updateData = { title: 'Updated Title' };
-  
-      // Mock the updateTodo method to throw a NotFoundException
+      const updateData = { task: 'Updated Task' };
       (appService.updateTodo as jest.Mock).mockImplementation(() => {
         throw new NotFoundException(`Todo with ${id} not found!`);
       });
-  
-      // Expect the controller to throw the same error when updateTodo is called
       expect(() => appController.updateTodo(id, updateData)).toThrow(NotFoundException);
       expect(appService.updateTodo).toHaveBeenCalledWith(999, updateData);
     });
-  })
+  });
 
-  // Unit Test for Remove one todo item
   describe('deleteTodo', () => {
-    it('should delete a todo by id and return the removed todo', () => {
+    it('should delete a todo by id', () => {
       const id = '1';
-      const removedTodo = { id: 1, title: 'Todo 1', description: 'Test description 1' };
-  
-      // Mock the deleteTodo method to return the removed todo
+      const removedTodo = { id: 1, task: 'Task 1', isCompleted: false, insertedAt: new Date() };
       (appService.deleteTodo as jest.Mock).mockReturnValue(removedTodo);
-  
-      // Call the controller's deleteTodo method (id is passed as string, service expects a number)
       const result = appController.deleteTodo(id);
-  
-      // Verify that the service method was called with the correct numeric id
       expect(appService.deleteTodo).toHaveBeenCalledWith(1);
-  
-      // Verify that the result matches the removed todo
       expect(result).toEqual(removedTodo);
     });
-  
+
     it('should throw NotFoundException if the todo is not found', () => {
       const id = '999';
-  
-      // Mock the deleteTodo method to throw a NotFoundException
       (appService.deleteTodo as jest.Mock).mockImplementation(() => {
         throw new NotFoundException(`Todo with id ${id} not found`);
       });
-  
-      // Expect the controller's deleteTodo method to throw the exception
       expect(() => appController.deleteTodo(id)).toThrow(NotFoundException);
       expect(appService.deleteTodo).toHaveBeenCalledWith(999);
     });
   });
 
-  // Unit Test for Removing all items in Todo list
-  describe('deleteAllTodo', () => {
-    it('should delete all todos and return the deleted todos', () => {
+  describe('deleteAllTodos', () => {
+    it('should delete all todos', () => {
       const allTodos = [
-        { id: 1, title: 'Todo 1', description: 'Test description 1' },
-        { id: 2, title: 'Todo 2', description: 'Test description 2' },
+        { id: 1, task: 'Task 1', isCompleted: false, insertedAt: new Date() },
+        { id: 2, task: 'Task 2', isCompleted: true, insertedAt: new Date() },
       ];
-  
-      // Mock the deleteAllTodos method to return the predefined todos array
       (appService.deleteAllTodos as jest.Mock).mockReturnValue(allTodos);
-  
-      // Call the controller's deleteAllTodo method
       const result = appController.deleteAllTodo();
-  
-      // Verify that the service method was called
       expect(appService.deleteAllTodos).toHaveBeenCalled();
-  
-      // Verify that the controller returns the expected todos
       expect(result).toEqual(allTodos);
     });
   });
-  
-  
 });
