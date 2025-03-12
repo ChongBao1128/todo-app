@@ -30,4 +30,9 @@ export class AppController {
     return this.appService.deleteTodo(Number(id));
   }
 
+  @Delete()
+  deleteAllTodo(): Todo[] {
+    return this.appService.deleteAllTodos();
+  }
+
 }
