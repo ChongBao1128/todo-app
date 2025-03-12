@@ -15,10 +15,24 @@ describe('AppController', () => {
           provide: AppService,
           useValue: {
             getTodos: jest.fn(() => [
-              { id: 1, task: 'Task 1', isCompleted: false, insertedAt: new Date() },
-              { id: 2, task: 'Task 2', isCompleted: true, insertedAt: new Date() },
+              {
+                id: 1,
+                task: 'Task 1',
+                isCompleted: false,
+                insertedAt: new Date(),
+              },
+              {
+                id: 2,
+                task: 'Task 2',
+                isCompleted: true,
+                insertedAt: new Date(),
+              },
             ]),
-            createTodo: jest.fn((dto) => ({ id: 1, ...dto, insertedAt: new Date() })),
+            createTodo: jest.fn((dto) => ({
+              id: 1,
+              ...dto,
+              insertedAt: new Date(),
+            })),
             updateTodo: jest.fn(),
             deleteTodo: jest.fn(),
             deleteAllTodos: jest.fn(),
@@ -34,8 +48,18 @@ describe('AppController', () => {
   describe('getAllTodos', () => {
     it('should return an array of todos', () => {
       const expectedTodos = [
-        { id: 1, task: 'Task 1', isCompleted: false, insertedAt: expect.any(Date) },
-        { id: 2, task: 'Task 2', isCompleted: true, insertedAt: expect.any(Date) },
+        {
+          id: 1,
+          task: 'Task 1',
+          isCompleted: false,
+          insertedAt: expect.any(Date),
+        },
+        {
+          id: 2,
+          task: 'Task 2',
+          isCompleted: true,
+          insertedAt: expect.any(Date),
+        },
       ];
       const todos = appController.getAllTodos();
       expect(appService.getTodos).toHaveBeenCalled();
@@ -48,7 +72,11 @@ describe('AppController', () => {
       const createTodoDto = { task: 'New Task', isCompleted: false };
       const result = appController.createTodo(createTodoDto);
       expect(appService.createTodo).toHaveBeenCalledWith(createTodoDto);
-      expect(result).toEqual({ id: 1, ...createTodoDto, insertedAt: expect.any(Date) });
+      expect(result).toEqual({
+        id: 1,
+        ...createTodoDto,
+        insertedAt: expect.any(Date),
+      });
     });
   });
 
@@ -69,7 +97,9 @@ describe('AppController', () => {
       (appService.updateTodo as jest.Mock).mockImplementation(() => {
         throw new NotFoundException(`Todo with ${id} not found!`);
       });
-      expect(() => appController.updateTodo(id, updateData)).toThrow(NotFoundException);
+      expect(() => appController.updateTodo(id, updateData)).toThrow(
+        NotFoundException,
+      );
       expect(appService.updateTodo).toHaveBeenCalledWith(999, updateData);
     });
   });
@@ -77,7 +107,12 @@ describe('AppController', () => {
   describe('deleteTodo', () => {
     it('should delete a todo by id', () => {
       const id = '1';
-      const removedTodo = { id: 1, task: 'Task 1', isCompleted: false, insertedAt: new Date() };
+      const removedTodo = {
+        id: 1,
+        task: 'Task 1',
+        isCompleted: false,
+        insertedAt: new Date(),
+      };
       (appService.deleteTodo as jest.Mock).mockReturnValue(removedTodo);
       const result = appController.deleteTodo(id);
       expect(appService.deleteTodo).toHaveBeenCalledWith(1);
