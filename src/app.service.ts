@@ -40,7 +40,10 @@ export class AppService {
   }
 
   // Update an existing todo in the Supabase 'todos' table
-  async updateTodo(id: number, updateData: Partial<Omit<Todo, 'id'>>): Promise<Todo> {
+  async updateTodo(
+    id: number,
+    updateData: Partial<Omit<Todo, 'id'>>,
+  ): Promise<Todo> {
     const { data, error } = await this.supabaseService.supabase
       .from('todos')
       .update(updateData)
@@ -74,7 +77,7 @@ export class AppService {
     const { data, error } = await this.supabaseService.supabase
       .from('todos')
       .delete()
-      .gt("id", 0);
+      .gt('id', 0);
 
     if (error) {
       throw error;
