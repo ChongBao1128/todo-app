@@ -12,6 +12,11 @@ export class AppService {
   private todos: Todo[] = [];
   private idCounter = 1;
 
+  // Read all todo items from database
+  getTodos(): Todo[] {
+    return this.todos;
+  }
+
   // Create a new todo item to database
   createTodo(todo: Omit<Todo, 'id'>): Todo {
     const newTodo: Todo = {
