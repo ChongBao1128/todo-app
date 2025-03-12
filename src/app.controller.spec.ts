@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { NotFoundException } from '@nestjs/common';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -21,6 +22,7 @@ describe('AppController', () => {
               { id: 4, title: 'Todo 4', description: 'Test description 4' },
             ]),
             createTodo: jest.fn((dto) => ({ id: 1, ...dto })),
+            updateTodo: jest.fn(),
           },
         },
       ],
@@ -66,4 +68,34 @@ describe('AppController', () => {
       expect(result).toEqual({ id: 1, title: 'Test Todo', description: 'Test description' });
     });
   });
+
+  describe('updateTodo', () => {
+    it('should update an existing todo and return the updated todo', () => {
+      const id = '1';
+      const updateData = { title: 'Updated Title' };
+      const updatedTodo = { id: 1, title: 'Updated Title', description: 'Existing description' };
+  
+      // Mock the updateTodo method to return our updatedTodo
+      (appService.updateTodo as jest.Mock).mockReturnValue(updatedTodo);
+  
+      const result = appController.updateTodo(id, updateData);
+  
+      expect(appService.updateTodo).toHaveBeenCalledWith(1, updateData);
+      expect(result).toEqual(updatedTodo);
+    });
+  
+    it('should throw NotFoundException if todo is not found', () => {
+      const id = '999';
+      const updateData = { title: 'Updated Title' };
+  
+      // Mock the updateTodo method to throw a NotFoundException
+      (appService.updateTodo as jest.Mock).mockImplementation(() => {
+        throw new NotFoundException(`Todo with ${id} not found!`);
+      });
+  
+      // Expect the controller to throw the same error when updateTodo is called
+      expect(() => appController.updateTodo(id, updateData)).toThrow(NotFoundException);
+      expect(appService.updateTodo).toHaveBeenCalledWith(999, updateData);
+    });
+  })
 });

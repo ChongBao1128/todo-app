@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 export interface Todo {
   id: number;
   title: string;
   description?: string;
-  completed?: boolean;
+  status?: boolean;
 }
 
 @Injectable()
@@ -27,5 +27,19 @@ export class AppService {
     this.todos.push(newTodo); // Add the new todo to the list
     return newTodo;
   }
-  
+
+  // Update existing todo item
+  updateTodo(id: number, updateData: Partial<Omit<Todo, 'id'>>): Todo {
+    const index = this.todos.findIndex(todo => todo.id === id);
+
+    if(index === -1) {
+      throw new NotFoundException(`Todo with ${id} not found!`); // not found
+    }
+
+    const updatedTodo = { ...this.todos[index], ...updateData };
+
+    this.todos[index] = updatedTodo;    
+    
+    return updatedTodo;
+  }
 }
